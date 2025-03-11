@@ -1,0 +1,6 @@
+@desafio_backend_2025_HostAddress = http://localhost:5216
+
+GET {{desafio_backend_2025_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
