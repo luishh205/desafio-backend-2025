@@ -23,12 +23,13 @@ namespace desafio_backend_2025.Repositories
         {
             try
             {
-                var url = $"{ReceitaWSUrl}cnpj/{cnpj}";
 
                 if (!ValidarCnpj(cnpj))
                 {
                     throw new Exception($"CNPJ inválido. Por favor, verifique e tente novamente. {cnpj}");
                 }
+
+                var url = $"{ReceitaWSUrl}cnpj/{cnpj}";
 
                 var response = await _httpClient.GetStringAsync(url);
 

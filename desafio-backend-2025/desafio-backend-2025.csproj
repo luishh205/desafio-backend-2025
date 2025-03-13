@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\images\6b2aa49e-34d1-4ce4-9f3a-c305d42bea14_test12.png" />
+    <Content Remove="wwwroot\images\beb621b6-b846-422a-ac64-5a0f32686ef9_WIN_20231106_07_32_48_Pro.jpg" />
+    <Content Remove="wwwroot\images\d8acc3ed-06a6-4453-9619-3c3ec886227d_carreta.png" />
+    <Content Remove="wwwroot\images\d9fee7e5-5cbd-41d0-a4bc-a46d1177564f_Captura de tela 2024-12-14 185249.png" />
+    <Content Remove="wwwroot\images\dddaeba9-e4d0-427e-ac5b-550c2036ac89_cavalo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
     <PackageReference Include="MySql.Data" Version="9.2.0" />

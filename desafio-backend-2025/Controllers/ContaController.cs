@@ -26,9 +26,17 @@ namespace desafio_backend_2025.Controllers
         /// <returns>Lista de contas</returns>
         [HttpGet]
         [SwaggerOperation(Summary = "Obtém todas as contas cadastradas", Description = "Retorna uma lista de todas as contas cadastradas na base de dados.")]
-        public async Task<IEnumerable<Conta>> Get()
+        public async Task<ActionResult<Response<IEnumerable<Conta>>>> Get()
         {
-            return await _contaRepository.GetAll();
+            try
+            {
+                var response = await _contaRepository.GetAll();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, Response<IEnumerable<Conta>>.Error($"Erro interno ao buscar contas: {ex.Message}"));
+            }
         }
 
         /// <summary>
@@ -38,12 +46,21 @@ namespace desafio_backend_2025.Controllers
         /// <returns>Conta com o ID especificado</returns>
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Obtém uma conta pelo ID", Description = "Retorna os detalhes de uma conta com base no ID fornecido.")]
-        public async Task<ActionResult<Conta>> GetById([FromRoute] int id)
+        public async Task<ActionResult<Response<Conta>>> GetById([FromRoute] int id)
         {
-            var conta = await _contaRepository.GetById(id);
-            if (conta == null)
-                return NotFound($"Conta com ID {id} não encontrada.");
-            return Ok(conta); 
+            try
+            {
+                var response = await _contaRepository.GetById(id);
+                if (!response.Success)
+                {
+                    return NotFound(response);
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, Response<Conta>.Error($"Erro interno ao buscar conta: {ex.Message}"));
+            }
         }
 
         /// <summary>
@@ -53,10 +70,26 @@ namespace desafio_backend_2025.Controllers
         /// <returns>ID da conta criada</returns>
         [HttpPost]
         [SwaggerOperation(Summary = "Cria uma nova conta", Description = "Cria uma nova conta utilizando os dados fornecidos.")]
-        public async Task<IActionResult> Create([FromForm] Conta conta) 
+        public async Task<ActionResult<Response<int>>> Create([FromForm] Conta conta) 
         {
-            await _contaRepository.Create(conta);
-            return CreatedAtAction(nameof(GetById), new { id = conta.Id }, conta);  
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(Response<int>.Error("Dados inválidos fornecidos."));
+                }
+
+                var response = await _contaRepository.Create(conta);
+                if (!response.Success)
+                {
+                    return BadRequest(response);
+                }
+                return CreatedAtAction(nameof(GetById), new { id = response.Data }, response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, Response<int>.Error($"Erro interno ao criar conta: {ex.Message}"));
+            }
         }
 
         /// <summary>
@@ -66,16 +99,32 @@ namespace desafio_backend_2025.Controllers
         /// <returns>Status da atualização</returns>
         [HttpPut]
         [SwaggerOperation(Summary = "Atualiza os dados de uma conta", Description = "Atualiza as informações de uma conta existente com base no ID.")]
-        public async Task<IActionResult> Update([FromForm] Conta conta)
+        public async Task<ActionResult<Response<int>>> Update([FromForm] Conta conta)
         {
-            var empresaExiste = await _contaRepository.VerificarExistenciaEmpresa(conta.Id);
-            if (!empresaExiste)
+            try
             {
-                return NotFound($"Empresa com ID {conta.Id} não encontrada."); 
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(Response<int>.Error("Dados inválidos fornecidos."));
+                }
 
-            await _contaRepository.Update(conta);
-            return NoContent();  
+                var empresaExiste = await _contaRepository.VerificarExistenciaEmpresa(conta.Id);
+                if (!empresaExiste)
+                {
+                    return NotFound(Response<int>.Error($"Conta com ID {conta.Id} não encontrada."));
+                }
+
+                var response = await _contaRepository.Update(conta);
+                if (!response.Success)
+                {
+                    return BadRequest(response);
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, Response<int>.Error($"Erro interno ao atualizar conta: {ex.Message}"));
+            }
         }
 
         /// <summary>
@@ -85,10 +134,27 @@ namespace desafio_backend_2025.Controllers
         /// <returns>Status da exclusão</returns>
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Exclui uma conta pelo ID", Description = "Exclui uma conta com base no ID fornecido.")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<Response<int>>> Delete(int id)
         {
-            await _contaRepository.Delete(id);
-            return NoContent();  
+            try
+            {
+                var empresaExiste = await _contaRepository.VerificarExistenciaEmpresa(id);
+                if (!empresaExiste)
+                {
+                    return NotFound(Response<int>.Error($"Conta com ID {id} não encontrada."));
+                }
+
+                var response = await _contaRepository.Delete(id);
+                if (!response.Success)
+                {
+                    return BadRequest(response);
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, Response<int>.Error($"Erro interno ao deletar conta: {ex.Message}"));
+            }
         }
     }
 }

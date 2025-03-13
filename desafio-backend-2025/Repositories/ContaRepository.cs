@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using static desafio_backend_2025.Repositories.ReceitaWSService;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace desafio_backend_2025.Repositories
 {
@@ -14,35 +15,35 @@ namespace desafio_backend_2025.Repositories
     {
         private readonly DatabaseConnection _db;
         private readonly ReceitaWSService _receitaWSService;
-        private readonly ILogger<ContaRepository> _logger;
 
-        public ContaRepository(DatabaseConnection db, ReceitaWSService receitaWSService, ILogger<ContaRepository> logger)
+        public ContaRepository(DatabaseConnection db, ReceitaWSService receitaWSService)
         {
             _db = db;
             _receitaWSService = receitaWSService;
-            _logger = logger;
         }
 
-        public async Task<IEnumerable<Conta>> GetAll()
+        public async Task<Response<IEnumerable<Conta>>> GetAll()
         {
             try
             {
                 using var conn = _db.GetConnection();
-                return await conn.QueryAsync<Conta>("SELECT * FROM Conta");
+                var contas = await conn.QueryAsync<Conta>("SELECT * FROM Conta");
+
+                return Response<IEnumerable<Conta>>.Ok(contas);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao buscar todas as contas. {ex.Message}");
+                return Response<IEnumerable<Conta>>.Error($"Erro ao buscar todas as contas: {ex.Message}");
             }
         }
 
-        public async Task<Conta> GetById(int id)
+        public async Task<Response<Conta>> GetById(int id)
         {
             try
             {
                 if (id <= 0)
                 {
-                    throw new Exception($"ID deve ser maior que zero. {id}");
+                    return Response<Conta>.Error("ID deve ser maior que zero.");
                 }
 
                 using var conn = _db.GetConnection();
@@ -52,57 +53,83 @@ namespace desafio_backend_2025.Repositories
                     new { Id = id })
                     .ConfigureAwait(false);
 
-                return conta;
+                if (conta == null)
+                {
+                    return Response<Conta>.Error($"Conta com ID {id} não encontrada.");
+                }
+
+                return Response<Conta>.Ok(conta);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao buscar conta pelo ID: {id} {ex.Message}");
+                return Response<Conta>.Error($"Erro ao buscar conta pelo ID: {id} - {ex.Message}");
             }
         }
 
-        public async Task<int> Create(Conta conta)
+        public async Task<Response<int>> Create(Conta conta)
         {
             try
             {
-                string erro;
-                if (!ValidarConta(conta.NumeroConta, conta.Agencia, out erro))
+                if (!ValidarConta(conta.NumeroConta, conta.Agencia, out string erro))
                 {
-                    throw new Exception(erro);
+                    return Response<int>.Error(erro);
                 }
 
                 conta.CNPJ = conta.CNPJ.Replace(".", "").Replace("/", "").Replace("-", "");
 
-                ReceitaWSResponse dados = new ReceitaWSResponse();
-                dados = await _receitaWSService.GetNomeEmpresaByCnpj(conta.CNPJ);
+                var dados = await _receitaWSService.GetNomeEmpresaByCnpj(conta.CNPJ);
                 if (dados == null || string.IsNullOrEmpty(dados.Nome))
                 {
-                    throw new Exception($"Nome da empresa não encontrado para o CNPJ: {conta.CNPJ}");
+                    return Response<int>.Error($"Nome da empresa não encontrado para o CNPJ: {conta.CNPJ}");
                 }
+
                 conta.nome = dados.Nome;
                 conta.fantasia = dados.Fantasia;
                 conta.email = dados.Email;
                 conta.telefone = dados.Telefone;
 
-                // Salva o documento e armazena o caminho no banco
-                if (conta.Documento != null)
-                {
-                    conta.ImagemDocumento = await SalvarDocumento(conta.Documento);
-                }
+                using var conn = _db.GetConnection(); 
 
-                using var conn = _db.GetConnection();
-                return await conn.ExecuteAsync(
-                    "INSERT INTO Conta (nome, fantasia, email, telefone, cnpj, numeroConta, agencia, imagemDocumento) " +
-                    "VALUES (@Nome, @fantasia, @email, @telefone, @CNPJ, @NumeroConta, @Agencia, @ImagemDocumento)",
-                    conta
-                );
+                conn.Open();
+
+                using var transaction = conn.BeginTransaction();
+
+                try
+                {
+                    var result = await conn.ExecuteAsync(
+                        "INSERT INTO Conta (nome, fantasia, email, telefone, cnpj, numeroConta, agencia, imagemDocumento) " +
+                        "VALUES (@Nome, @fantasia, @email, @telefone, @CNPJ, @NumeroConta, @Agencia, @ImagemDocumento)",
+                        conta, transaction);
+
+                    if (conta.Documento != null)
+                    {
+                        string caminhoDocumento = await SalvarDocumento(conta.Documento);
+
+                        conta.ImagemDocumento = caminhoDocumento;
+
+                        await conn.ExecuteAsync(
+                            "UPDATE Conta SET imagemDocumento = @ImagemDocumento WHERE id = @Id",
+                            new { ImagemDocumento = caminhoDocumento, Id = conta.Id }, transaction);
+                    }
+
+                    transaction.Commit();
+
+                    return Response<int>.Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Response<int>.Error($"Erro ao criar conta com CNPJ: {conta.CNPJ} - {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao criar conta com CNPJ: {conta.CNPJ} {ex.Message}");
+                return Response<int>.Error($"Erro ao criar conta com CNPJ: {conta.CNPJ} - {ex.Message}");
             }
         }
 
-        public async Task<int> Update(Conta conta)
+
+        public async Task<Response<int>> Update(Conta conta)
         {
             try
             {
@@ -112,7 +139,7 @@ namespace desafio_backend_2025.Repositories
                 dados = await _receitaWSService.GetNomeEmpresaByCnpj(cnpj);
                 if (dados == null || string.IsNullOrEmpty(dados.Nome))
                 {
-                    throw new Exception($"Empresa não encontrado para o CNPJ: {conta.CNPJ}");
+                    return Response<int>.Error($"Empresa não encontrado para o CNPJ: {conta.CNPJ}");
                 }
                 conta.nome = dados.Nome;
                 conta.fantasia = dados.Fantasia;
@@ -145,29 +172,55 @@ namespace desafio_backend_2025.Repositories
                     conta.ImagemDocumento = caminhoAtual;
                 }
 
-                return await conn.ExecuteAsync(
-                    "UPDATE Conta SET nome = @Nome,fantasia = @fantasia,email = @email,telefone = @telefone, cnpj = @CNPJ, numeroConta = @NumeroConta, agencia = @Agencia, imagemDocumento = @ImagemDocumento WHERE id = @Id",
-                    conta
-                );
+                var result = await conn.ExecuteAsync(
+                   "UPDATE Conta SET nome = @Nome, fantasia = @fantasia, email = @email, telefone = @telefone, cnpj = @CNPJ, numeroConta = @NumeroConta, agencia = @Agencia, imagemDocumento = @ImagemDocumento WHERE id = @Id",
+                   conta);
+
+                return Response<int>.Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao atualizar conta com ID: {conta.Id}  {ex.Message}");
+                return Response<int>.Error($"Erro ao atualizar conta com ID: {conta.Id}  {ex.Message}");
             }
         }
 
-        public async Task<int> Delete(int id)
+        public async Task<Response<bool>> Delete(int id)
         {
             try
             {
+
+                var empresaExiste = await VerificarExistenciaEmpresa(id);
+                if (!empresaExiste)
+                {
+                    return Response<bool>.Error($"Conta com ID {id} não encontrada.");
+                }
+
                 using var conn = _db.GetConnection();
-                return await conn.ExecuteAsync("DELETE FROM Conta WHERE id = @Id", new { Id = id });
+
+                string caminhoAtual = await conn.ExecuteScalarAsync<string>(
+                    "SELECT imagemDocumento FROM Conta WHERE id = @Id", new { Id = id }
+                );
+                if (!string.IsNullOrEmpty(caminhoAtual))
+                {
+                    DeletarDocumento(caminhoAtual);
+                }
+
+                var result = await conn.ExecuteAsync("DELETE FROM Conta WHERE id = @Id", new { Id = id });
+
+                if (result == 0)
+                {
+                    return Response<bool>.Error($"Nenhuma conta encontrada com o ID: {id}");
+                }
+
+                return Response<bool>.Ok(true);
+
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao deletar conta com CNPJ: {id} {ex.Message}");
+                return Response<bool>.Error($"Erro ao deletar conta com ID: {id} {ex.Message}");
             }
         }
+
 
         private async Task<string> SalvarDocumento(IFormFile file)
         {
@@ -226,12 +279,12 @@ namespace desafio_backend_2025.Repositories
         {
             try
             {
-                var empresa = await GetById(id);
-                return empresa != null;
+                var response = await GetById(id);
+                return response.Success && response.Data != null;
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception($"Erro ao Verificar se existe conta com CNPJ: {id} {ex.Message}");
+                return false;
             }
         }
     }
