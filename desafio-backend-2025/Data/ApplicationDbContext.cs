@@ -1,6 +1,4 @@
 ﻿using System.Data;
-using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
 using MySql.Data.MySqlClient;
 
 public class DatabaseConnection

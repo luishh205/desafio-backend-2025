@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace desafio_backend_2025.Models
@@ -21,10 +22,12 @@ namespace desafio_backend_2025.Models
             [Required]
             [ForeignKey("Conta")]
             public int ContaId { get; set; }
+            public int ContaDestinoId { get; set; }
 
             public DateTime DataTransacao { get; set; }
 
             public Conta Conta { get; set; }
+            public Conta ContaDestino { get; set; }
         
     }
     public enum TipoTransacao

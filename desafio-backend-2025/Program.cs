@@ -26,13 +26,7 @@ builder.Services.AddScoped<TransacaoRepository>();
 //ReceitaWSService
 builder.Services.AddHttpClient<ReceitaWSService>();
 
-
-
-
 var app = builder.Build();
-
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
