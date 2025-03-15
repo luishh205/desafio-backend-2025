@@ -1,5 +1,6 @@
 ﻿using desafio_backend_2025.Models;
 using desafio_backend_2025.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI;
 using Swashbuckle.AspNetCore.Annotations;
@@ -24,6 +25,7 @@ namespace desafio_backend_2025.Controllers
         /// Obtém todas as contas cadastradas.
         /// </summary>
         /// <returns>Lista de contas</returns>
+        [Authorize]
         [HttpGet]
         [SwaggerOperation(Summary = "Obtém todas as contas cadastradas", Description = "Retorna uma lista de todas as contas cadastradas na base de dados.")]
         public async Task<ActionResult<Response<IEnumerable<Conta>>>> Get()
@@ -44,6 +46,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="id">ID da conta</param>
         /// <returns>Conta com o ID especificado</returns>
+        [Authorize]
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Obtém uma conta pelo ID", Description = "Retorna os detalhes de uma conta com base no ID fornecido.")]
         public async Task<ActionResult<Response<Conta>>> GetById([FromRoute] int id)
@@ -68,6 +71,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="conta">Objeto Conta com os dados a serem salvos</param>
         /// <returns>ID da conta criada</returns>
+        [Authorize]
         [HttpPost]
         [SwaggerOperation(Summary = "Cria uma nova conta", Description = "Cria uma nova conta utilizando os dados fornecidos.")]
         public async Task<ActionResult<Response<int>>> Create([FromForm] Conta conta) 
@@ -97,6 +101,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="conta">Objeto Conta com os dados a serem atualizados</param>
         /// <returns>Status da atualização</returns>
+        [Authorize]
         [HttpPut]
         [SwaggerOperation(Summary = "Atualiza os dados de uma conta", Description = "Atualiza as informações de uma conta existente com base no ID.")]
         public async Task<ActionResult<Response<int>>> Update([FromForm] Conta conta)
@@ -132,6 +137,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="id">ID da conta</param>
         /// <returns>Status da exclusão</returns>
+        [Authorize]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Exclui uma conta pelo ID", Description = "Exclui uma conta com base no ID fornecido.")]
         public async Task<ActionResult<Response<int>>> Delete(int id)

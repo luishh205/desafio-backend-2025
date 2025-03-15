@@ -1,29 +1,73 @@
 using desafio_backend_2025.Repositories;
-using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configuração da chave secreta para JWT
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+
+// Configuração do JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false; 
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false, 
+            ValidateAudience = false,
+            ValidateLifetime = true, 
+            IssuerSigningKey = new SymmetricSecurityKey(key) 
+        };
+    });
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
-    c.EnableAnnotations(); // Habilita anotações do Swagger
+    c.EnableAnnotations(); 
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Conta Bancária", Version = "v1" });
+
+    // Definição do JWT no Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Insira o token JWT no formato: Bearer {seu_token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
+
+
 
 //coleção de conection de banco de dados
 builder.Services.AddSingleton<DatabaseConnection>();
 
 //REGISTRO DE REPOSITORY
-//ContaRepository
 builder.Services.AddScoped<ContaRepository>();
-//TransacaoRepository
 builder.Services.AddScoped<TransacaoRepository>();
-//ReceitaWSService
+builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddHttpClient<ReceitaWSService>();
 
 var app = builder.Build();
@@ -37,6 +81,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,5 +1,6 @@
 ﻿using desafio_backend_2025.Models;
 using desafio_backend_2025.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI;
 using Swashbuckle.AspNetCore.Annotations;
@@ -18,12 +19,13 @@ namespace desafio_backend_2025.Controllers
         {
             _transacaoRepository = transacaoRepository;
         }
-        
-        
+
+
         /// <summary>
         /// Obtém saldo da conta cadastrada.
         /// </summary>
         /// <returns>Get Saldo</returns>
+        [Authorize]
         [HttpGet("saldo/{id}")]
         [SwaggerOperation(Summary = "Obtém o saldo da conta", Description = "Retorna o saldo da conta na base de dados.")]
         public async Task<ActionResult<Transacao>> GetSaldo([FromRoute] int id)
@@ -49,6 +51,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="id">ID da conta</param>
         /// <returns>Extrado da Conta com o ID especificado</returns>
+        [Authorize]
         [HttpGet("extrato/{id}")]
         [SwaggerOperation(Summary = "Obtém o extrato da conta pelo ID", Description = "Retorna o extrato da conta com base no ID fornecido.")]
         public async Task<ActionResult<Transacao>> Extrato([FromRoute] int id)
@@ -74,6 +77,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="conta">Objeto Conta com os dados a serem salvos</param>
         /// <returns>ID da conta criada</returns>
+        [Authorize]
         [HttpPost("deposito")]
         [SwaggerOperation(Summary = "Realizar um novo deposito", Description = "Realizar um deposito utilizando os dados fornecidos.")]
         public async Task<ActionResult<Response<bool>>> Depositar( int ContaId, decimal Valor )
@@ -104,6 +108,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="conta">Objeto Conta com os dados a serem salvos</param>
         /// <returns>ID da conta criada</returns>
+        [Authorize]
         [HttpPost("saque")]
         [SwaggerOperation(Summary = "Realizar um novo saque", Description = "Realizar um saque utilizando os dados fornecidos.")]
         public async Task<ActionResult<Response<bool>>> Sacar(int ContaId, decimal Valor)
@@ -133,6 +138,7 @@ namespace desafio_backend_2025.Controllers
         /// </summary>
         /// <param name="conta">Objeto Conta com os dados a serem salvos</param>
         /// <returns>ID da conta criada</returns>
+        [Authorize]
         [HttpPost("transferencia")]
         [SwaggerOperation(Summary = "Realizar uma nova transferencia", Description = "Realizar uma nova transferencia utilizando os dados fornecidos.")]
         public async Task<ActionResult<Response<bool>>> Transferir(int contaOrigemId, int contaDestinoId, decimal Valor)

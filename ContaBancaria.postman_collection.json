@@ -1,0 +1,794 @@
+{
+	"info": {
+		"_postman_id": "352110d3-263a-450f-b9b6-a742b537d35b",
+		"name": "ContaBancaria",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31238229"
+	},
+	"item": [
+		{
+			"name": "usuario",
+			"item": [
+				{
+					"name": "register/semAuth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 0,\n  \"email\": \"luis204@gmail.com\",\n  \"password\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7260/api/usuario/register",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/usuario/27",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario",
+								"27"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/usuario/25",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario",
+								"25"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 25,\n  \"email\": \"luishh205@gmail.com\",\n  \"password\": \"2345423\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7260/api/usuario",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getBy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/usuario",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login/semAuth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 0,\n  \"email\": \"luishh205@gmail.com\",\n  \"password\": \"2345423\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7260/api/usuario/login",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"usuario",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/contas",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"contas"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "conta",
+			"item": [
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ImagemDocumento",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "CNPJ",
+									"value": "32983069000179",
+									"type": "text"
+								},
+								{
+									"key": "telefone",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "fantasia",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "Agencia",
+									"value": "1235435",
+									"type": "text"
+								},
+								{
+									"key": "NumeroConta",
+									"value": "131678",
+									"type": "text"
+								},
+								{
+									"key": "Documento",
+									"contentType": "image/png",
+									"type": "file",
+									"src": "/C:/Users/luish/Pictures/cavalo.png"
+								},
+								{
+									"key": "nome",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "Id",
+									"value": "19",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "string",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://localhost:7260/api/contas",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"contas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ImagemDocumento",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "CNPJ",
+									"value": "35227961000118",
+									"type": "text"
+								},
+								{
+									"key": "telefone",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "fantasia",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "Agencia",
+									"value": "12312",
+									"type": "text"
+								},
+								{
+									"key": "NumeroConta",
+									"value": "1321",
+									"type": "text"
+								},
+								{
+									"key": "Documento",
+									"contentType": "image/png",
+									"type": "file",
+									"src": "postman-cloud:///1effee42-c69e-4230-b85f-5c4faef03012"
+								},
+								{
+									"key": "nome",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "Id",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "string",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://localhost:7260/api/contas",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"contas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/contas/19",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"contas",
+								"19"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/contas/29",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"contas",
+								"29"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transacao",
+			"item": [
+				{
+					"name": "saldo/id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/transacao/saldo/22",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"transacao",
+								"saldo",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "extrato/id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/transacao/extrato/25",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"transacao",
+								"extrato",
+								"25"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deposito",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/transacao/deposito?ContaId=22&Valor=1.80",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"transacao",
+								"deposito"
+							],
+							"query": [
+								{
+									"key": "ContaId",
+									"value": "22"
+								},
+								{
+									"key": "Valor",
+									"value": "1.80"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "saque",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/transacao/saque?ContaId=23&Valor=1.80",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"transacao",
+								"saque"
+							],
+							"query": [
+								{
+									"key": "ContaId",
+									"value": "23"
+								},
+								{
+									"key": "Valor",
+									"value": "1.80"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transferencia",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7260/api/transacao/transferencia?contaOrigemId=22&contaDestinoId=23&Valor=1.80",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7260",
+							"path": [
+								"api",
+								"transacao",
+								"transferencia"
+							],
+							"query": [
+								{
+									"key": "contaOrigemId",
+									"value": "22"
+								},
+								{
+									"key": "contaDestinoId",
+									"value": "23"
+								},
+								{
+									"key": "Valor",
+									"value": "1.80"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}
