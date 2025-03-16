@@ -17,7 +17,7 @@ namespace desafio_backend_2025.Models
             [Required]
             public TipoTransacao Tipo { get; set; }
 
-            public string TipoNome => Enum.GetName(typeof(TipoTransacao), Tipo);
+            public string? TipoNome => Enum.GetName(typeof(TipoTransacao), Tipo);
 
             [Required]
             [ForeignKey("Conta")]
@@ -26,8 +26,9 @@ namespace desafio_backend_2025.Models
 
             public DateTime DataTransacao { get; set; }
 
-            public Conta Conta { get; set; }
-            public Conta ContaDestino { get; set; }
+            public Conta? Conta { get; set; }
+
+            public Conta? ContaDestino { get; set; }
         
     }
     public enum TipoTransacao

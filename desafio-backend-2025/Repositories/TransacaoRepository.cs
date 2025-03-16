@@ -41,9 +41,19 @@ namespace desafio_backend_2025.Repositories
                         "SELECT * FROM Conta WHERE id = @ContaId",
                         new { ContaId = transacao.ContaId });
 
+                    if (transacao.Conta == null)
+                    {
+                        transacao.Conta = new Conta { CNPJ = "00.000.000/0001-00" };
+                    }
+
                     transacao.ContaDestino = await conn.QueryFirstOrDefaultAsync<Conta>(
                         "SELECT * FROM Conta WHERE id = @ContaId",
                         new { ContaId = transacao.ContaDestinoId });
+
+                    if (transacao.ContaDestino == null)
+                    {
+                        transacao.ContaDestino = new Conta { CNPJ = "00.000.000/0001-00" };
+                    }
                 }
 
                 if (extrato == null || !extrato.Any())
@@ -58,6 +68,7 @@ namespace desafio_backend_2025.Repositories
                 return Response<IEnumerable<Transacao>>.Error($"Erro ao buscar extrato da conta com ID {id}: {ex.Message}");
             }
         }
+       
         public async Task<Response<IEnumerable<Transacao>>> GetSaldo(int id)
         {
             try
@@ -115,30 +126,50 @@ namespace desafio_backend_2025.Repositories
                 if (valor <= 0)
                     return Response<bool>.Error("O valor do depósito deve ser maior que zero.");
 
-                var contaResponse = await _ContaRepository.GetById(contaId);
-                if (!contaResponse.Success || contaResponse.Data == null)
-                    return Response<bool>.Error($"Conta com ID {contaId} não encontrada.");
-
                 using var conn = _db.GetConnection();
+                conn.Open();
+                using var transaction = conn.BeginTransaction();
 
-                var transacao = new Transacao
+                try
                 {
-                    ContaId = contaId,
-                    Valor = valor,
-                    DataTransacao = DateTime.Now
-                };
-               
-                string sql = @"INSERT INTO transacoes (contaId, valor, tipo, dataTransacao) 
-                                   VALUES (@ContaId, @Valor, 'deposito', @DataTransacao);";
+                    // Bloqueia a conta para evitar concorrência
+                    var conta = await conn.QueryFirstOrDefaultAsync<Conta>(
+                        "SELECT * FROM Conta WHERE id = @Id FOR UPDATE",
+                        new { Id = contaId },
+                        transaction);
 
-                int Transacao = await conn.ExecuteAsync(sql, transacao);
+                    if (conta == null)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error($"Conta com ID {contaId} não encontrada.");
+                    }
 
-                if(Transacao == 0)
-                {
-                    return Response<bool>.Error($"Falha ao inserir a transação no banco de dados.");
+                    var transacao = new Transacao
+                    {
+                        ContaId = contaId,
+                        Valor = valor,
+                        DataTransacao = DateTime.Now
+                    };
+
+                    string sql = @"INSERT INTO transacoes (contaId, valor, tipo, dataTransacao) 
+                           VALUES (@ContaId, @Valor, 'deposito', @DataTransacao);";
+
+                    int retorno = await conn.ExecuteAsync(sql, transacao, transaction);
+
+                    if (retorno == 0)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error("Falha ao inserir a transação no banco de dados.");
+                    }
+
+                    transaction.Commit();
+                    return Response<bool>.Ok(true);
                 }
-
-                return Response<bool>.Ok(true);
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Response<bool>.Error($"Erro ao realizar depósito: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
@@ -155,31 +186,33 @@ namespace desafio_backend_2025.Repositories
                     return Response<decimal>.Error("ID deve ser maior que zero.");
                 }
 
-                var contaResponse = await _ContaRepository.GetById(id);
-                if (!contaResponse.Success || contaResponse.Data == null)
-                {
-                    return Response<decimal>.Error($"Conta com ID {id} não encontrada.");
-                }
-
                 using var conn = _db.GetConnection();
+                conn.Open();
+                using var transaction = conn.BeginTransaction();
 
-                // Consulta SQL para calcular o saldo
-                string sql = @"
-            SELECT 
-                SUM(CASE 
-                        WHEN tipo = 'deposito' THEN valor
-                        WHEN tipo = 'saque' THEN -valor
-                        WHEN tipo = 'transferencia' THEN -valor
-                        ELSE 0
-                    END) AS saldo
-            FROM transacoes
-            WHERE contaId = @Id;";
+                try
+                {
+                    string sql = @"
+                                SELECT 
+                                    SUM(CASE 
+                                            WHEN tipo = 'deposito' THEN valor
+                                            WHEN tipo = 'saque' THEN -valor
+                                            WHEN tipo = 'transferencia' THEN -valor
+                                            ELSE 0
+                                        END) AS saldo
+                                FROM transacoes
+                                WHERE contaId = @Id;";
 
-                // Executa a consulta e retorna o saldo
-                var saldo = await conn.QueryFirstOrDefaultAsync<decimal?>(sql, new { Id = id });
+                    var saldo = await conn.QueryFirstOrDefaultAsync<decimal?>(sql, new { Id = id }, transaction);
 
-                // Se não houver transações, o saldo é 0
-                return Response<decimal>.Ok(saldo ?? 0);
+                    transaction.Commit();
+                    return Response<decimal>.Ok(saldo ?? 0);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Response<decimal>.Error($"Erro ao buscar saldo da conta com ID {id}: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
@@ -194,33 +227,63 @@ namespace desafio_backend_2025.Repositories
                 if (valor <= 0)
                     return Response<bool>.Error("O valor do saque deve ser maior que zero.");
 
-                var saldoResponse = await VerificaSaldoConta(contaId);
-                if (!saldoResponse.Success)
-                    return Response<bool>.Error(saldoResponse.Message);
-
-                if (saldoResponse.Data < valor)
-                    return Response<bool>.Error("Saldo insuficiente para saque.");
-
                 using var conn = _db.GetConnection();
+                conn.Open();
+                using var transaction = conn.BeginTransaction();
 
-                var transacao = new Transacao
+                try
                 {
-                    ContaId = contaId,
-                    Valor = valor,
-                    DataTransacao = DateTime.Now
-                };
+                    //Bloqueia a conta para evitar concorrência
+                    var conta = await conn.QueryFirstOrDefaultAsync<Conta>(
+                        "SELECT * FROM Conta WHERE id = @Id FOR UPDATE",
+                        new { Id = contaId },
+                        transaction);
 
-                string sql = @"INSERT INTO Transacoes (ContaId, Valor, Tipo, DataTransacao) 
-                       VALUES (@ContaId, @Valor, 'saque', @DataTransacao);";
+                    if (conta == null)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error($"Conta com ID {contaId} não encontrada.");
+                    }
 
-                int Transacao = await conn.ExecuteAsync(sql, transacao);
+                    var saldoResponse = await VerificaSaldoConta(contaId);
+                    if (!saldoResponse.Success)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error(saldoResponse.Message);
+                    }
 
-                if (Transacao == 0)
-                {
-                    return Response<bool>.Error($"Falha ao inserir a transação no banco de dados.");
+                    if (saldoResponse.Data < valor)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error("Saldo insuficiente para saque.");
+                    }
+
+                    var transacao = new Transacao
+                    {
+                        ContaId = contaId,
+                        Valor = valor,
+                        DataTransacao = DateTime.Now
+                    };
+
+                    string sql = @"INSERT INTO Transacoes (ContaId, Valor, Tipo, DataTransacao) 
+                           VALUES (@ContaId, @Valor, 'saque', @DataTransacao);";
+
+                    int retorno = await conn.ExecuteAsync(sql, transacao, transaction);
+
+                    if (retorno == 0)
+                    {
+                        transaction.Rollback();
+                        return Response<bool>.Error("Falha ao inserir a transação no banco de dados.");
+                    }
+
+                    transaction.Commit();
+                    return Response<bool>.Ok(true);
                 }
-
-                return Response<bool>.Ok(true);
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Response<bool>.Error($"Erro ao realizar saque: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {

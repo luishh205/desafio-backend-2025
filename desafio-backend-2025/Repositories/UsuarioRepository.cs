@@ -103,7 +103,14 @@ namespace desafio_backend_2025.Repositories
 
         public string GerarToken(Usuario usuario)
         {
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+            var jwtKey = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                return "A chave JWT não está configurada.";
+            }
+
+            var key = Encoding.ASCII.GetBytes(jwtKey);
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
