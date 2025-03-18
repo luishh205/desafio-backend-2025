@@ -13,6 +13,8 @@ O projeto utiliza as seguintes tecnologias principais:
 
     ASP.NET Core: Para configuração de autenticação, autorização e gerenciamento de requisições HTTP.
 
+    MultipartFormData: Para upload de arquivos, como imagens, na API
+
 
 Preparação para Colocar o Desafio em Funcionamento: Configuração de Banco de Dados, Rotas da API e Execução do Projeto C# .NET 8
 
