@@ -1,4 +1,21 @@
+
+O projeto utiliza as seguintes tecnologias principais:
+
+    .NET 8: Framework para o desenvolvimento da API.
+
+    JWT (JSON Web Tokens): Para autenticação de usuários e proteção das rotas da API.
+
+    Swagger: Para documentação interativa e testes das rotas da API.
+
+    MySQL: Banco de dados relacional para persistência de dados.
+
+    HttpClient: Para consumo de APIs externas.
+
+    ASP.NET Core: Para configuração de autenticação, autorização e gerenciamento de requisições HTTP.
+
+
 Preparação para Colocar o Desafio em Funcionamento: Configuração de Banco de Dados, Rotas da API e Execução do Projeto C# .NET 8
+
 
 1. Clonar o Repositório GitHub
 Primeiro, você precisa clonar o repositório do GitHub para sua máquina local.
