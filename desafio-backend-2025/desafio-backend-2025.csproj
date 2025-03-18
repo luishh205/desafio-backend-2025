@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\images\025e6a00-bad8-4920-9c45-f1521c20d5a7_download.jpeg" />
     <Content Remove="wwwroot\images\6b2aa49e-34d1-4ce4-9f3a-c305d42bea14_test12.png" />
     <Content Remove="wwwroot\images\beb621b6-b846-422a-ac64-5a0f32686ef9_WIN_20231106_07_32_48_Pro.jpg" />
     <Content Remove="wwwroot\images\d8acc3ed-06a6-4453-9619-3c3ec886227d_carreta.png" />

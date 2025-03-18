@@ -146,17 +146,14 @@ namespace desafio_backend_2025.Repositories
                 conta.email = dados.Email;
                 conta.telefone = dados.Telefone;
 
+                conta.CNPJ = conta.CNPJ.Replace(".", "").Replace("/", "").Replace("-", "");
+
                 using var conn = _db.GetConnection();
 
                 // Buscar caminho do documento atual no banco
                 string? caminhoAtual = await conn.ExecuteScalarAsync<string>(
                     "SELECT imagemDocumento FROM Conta WHERE cnpj = @CNPJ", new { conta.CNPJ }
                 );
-
-                if (caminhoAtual == null)
-                {
-                    return Response<int>.Error($"Caminho do documento não encontrado.");
-                }
 
                 if (conta.Documento != null)
                 {

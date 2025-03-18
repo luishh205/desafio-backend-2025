@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using desafio_backend_2025.Models;
 using Newtonsoft.Json;
 
 
@@ -23,11 +24,12 @@ namespace desafio_backend_2025.Repositories
         {
             try
             {
-
                 if (!ValidarCnpj(cnpj))
                 {
                     throw new Exception($"CNPJ inválido. Por favor, verifique e tente novamente. {cnpj}");
                 }
+
+                cnpj = cnpj.Replace(".", "").Replace("/", "").Replace("-", "");
 
                 var url = $"{ReceitaWSUrl}cnpj/{cnpj}";
 
