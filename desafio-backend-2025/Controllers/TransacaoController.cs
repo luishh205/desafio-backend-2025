@@ -30,7 +30,6 @@ namespace desafio_backend_2025.Controllers
         [SwaggerOperation(Summary = "Obtém o saldo da conta", Description = "Retorna o saldo da conta na base de dados.")]
         public async Task<ActionResult<Transacao>> GetSaldo([FromRoute] int id)
         {
-            //return await _transacaoRepository.GetSaldo();
             try
             {
                 var response = await _transacaoRepository.GetSaldo(id);
